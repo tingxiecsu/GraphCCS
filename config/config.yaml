@@ -1,0 +1,11 @@
+batch_size: 16
+train_epoch: 250
+LR: 0.0001
+decay: 0.85
+decay_interval: 10
+num_workers: 0
+result_folder: 'C:/project/test/'
+gnn_hid_dim_drug: 256 
+gnn_num_layers: 1
+hidden_dim_drug: 256
+node_feat_size: 147
