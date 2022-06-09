@@ -69,8 +69,8 @@ def test_plot(res,config):
     plt.show()
 
 def main():
-    config = yaml.load(open("C:/project/config/config.yaml", "r"), Loader=yaml.FullLoader)
-    dataset = pd.read_csv('C:/project/data/ccsbase_4_2.csv')
+    config = yaml.load(open("/config/config.yaml", "r"), Loader=yaml.FullLoader)
+    dataset = pd.read_csv('/data/ccsbase_4_2.csv')
     smiles = np.array(list(dataset['SMI']))
     y = np.array(list(dataset['CCS']))
     add = np.array(list(dataset['Adduct']))
