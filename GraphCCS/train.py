@@ -253,7 +253,7 @@ class Predict():
         self.df_data = df_data
         self.model = model
         self.config = config
-        self.device = device
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def ccs_predict(self):
         info = data_process_loader_Property_Prediction(self.df_data.index.values, self.df_data.Label.values, self.df_data, **self.config)
