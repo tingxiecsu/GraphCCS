@@ -249,13 +249,17 @@ class Train():
 
 
 class Predict():
-    def __init__(self,device,df_data,model,**config):
+    def __init__(self,df_data,model_path,**config):
         self.df_data = df_data
-        self.model = model
+        self.model_path = model_path
         self.config = config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def ccs_predict(self):
+        model = Graphccs(in_feats = self.config['node_feat_size'], hidden_feats = [self.config['gnn_hid_dim_drug']] * self.config['gnn_num_layers'], 
+                         activation = [F.relu] * self.config['gnn_num_layers'], 
+                         predictor_dim = self.config['hidden_dim_drug'])
+        model = load_pretrained( model, self.model_path, device = 'cuda')
         info = data_process_loader_Property_Prediction(self.df_data.index.values, self.df_data.Label.values, self.df_data, **self.config)
         self.model.to(self.device)
         params = {'batch_size': self.config['batch_size'],
@@ -273,6 +277,7 @@ class Predict():
             logits = torch.squeeze(score).detach().cpu().numpy()
             y_pred = y_pred + logits.flatten().tolist()
         return y_pred
+
 
 def load_pretrained(device,model, path):
 	if not os.path.exists(path):
