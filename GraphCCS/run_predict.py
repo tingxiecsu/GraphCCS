@@ -13,7 +13,7 @@ import pandas as pd
 def main():
     config = yaml.load(open("/config/config.yaml", "r"), Loader=yaml.FullLoader)
     dataset = pd.read_csv('/data/')
-    model_path = 'C:/project/model/model.pt'
+    model_path = '/model/model.pt'
     model_predict = Predict(dataset,model_path,**config)
     y=model_predict.ccs_predict()
     dataset['predicts']=''
