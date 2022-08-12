@@ -37,7 +37,7 @@ def train_val(dataset,seed):
     dataset_val = dataset.loc[val_indices,columns]
     return dataset_train,dataset_val
 
-def data_process(X = None, y=None,Adduct=None,frac = [0.8, 0.1, 0.1], random_seed = 1):
+def data_process(X = None, y=None,Adduct=None, random_seed = 1):
     print('Property Prediction Mode...')
     df_data = pd.DataFrame(zip(X, y,Adduct))
     df_data.rename(columns={0:'SMILES',1: 'Label',2: 'Adduct'},inplace=True)
@@ -75,7 +75,7 @@ def main():
     y = np.array(list(dataset['CCS']))
     add = np.array(list(dataset['Adduct']))
     train, val, test = data_process(X = smiles, y = y, Adduct = add,
-                                    frac = [0.9, 0.1, 0.1],random_seed = 1)
+                                   random_seed = 1)
     graphccs = Train(train,val,test,**config)
     graphccs.train_()
     path = config['result_folder']
