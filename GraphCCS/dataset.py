@@ -228,6 +228,7 @@ def edit_adduct_mol(mol,adduct):
     edit_mol : The editted rdkit.Chem.rdchem Mol object
     """
     atoms_num = mol.GetNumAtoms()
+    mol_nH = mol
     mol = Chem.AddHs(mol)
     edit_mol = mol
     AllChem.ComputeGasteigerCharges(mol)
@@ -266,12 +267,14 @@ def edit_adduct_mol(mol,adduct):
             edcombo.AddBond(pkb,len(partial_charge),order=Chem.rdchem.BondType.IONIC)
             edit_mol = edcombo.GetMol()
         if adduct == '[M+H-H2O]+':
-            GasteigerCharge_initial = 0
+            GasteigerCharge_initial = 0.0
             leaving_group = mol.GetAtomWithIdx(0)
             H_idx = 0
-            for atom in mol.GetAtoms():
+            for atom in mol_nH.GetAtoms():
                 if atom.GetSymbol() == 'O' and atom.GetTotalNumHs() != 0:
-                    GasteigerCharge = atom.GetProp('_GasteigerCharge')
+                    atom_idx = atom.GetIdx()
+                    atom = mol.GetAtomWithIdx(atom_idx)
+                    GasteigerCharge = float(atom.GetProp('_GasteigerCharge'))
                     if GasteigerCharge < GasteigerCharge_initial:
                         leaving_group = atom
                         neighbors_idx = [x.GetAtomicNum() for x in atom.GetNeighbors()]
@@ -284,9 +287,11 @@ def edit_adduct_mol(mol,adduct):
             edit_mol = mw.GetMol()
     elif adduct[-1] == '-':
         if adduct == '[M-H]-':
+            H_idx = 0
             for pka in pkas:
-                atom = mol.GetAtomWithIdx(pka)
+                atom = mol_nH.GetAtomWithIdx(pka)
                 if atom.GetTotalNumHs() != 0:
+                    atom = mol.GetAtomWithIdx(pka)
                     neighbors = [x for x in atom.GetNeighbors()]
                     neighbors_idx = [x.GetAtomicNum() for x in atom.GetNeighbors()]
                     if 1 in neighbors_idx:
@@ -317,8 +322,9 @@ def edit_adduct_mol(mol,adduct):
             edit_mol = edcombo.GetMol()
             for pka in pkas:
                 pka = pka
-                atom = edit_mol.GetAtomWithIdx(pka)
+                atom = mol_nH.GetAtomWithIdx(pka)
                 if atom.GetTotalNumHs() != 0:
+                    atom = edit_mol.GetAtomWithIdx(pka)
                     neighbors = [x for x in atom.GetNeighbors()]
                     neighbors_idx = [x.GetAtomicNum() for x in atom.GetNeighbors()]
                     if 1 in neighbors_idx:
@@ -331,8 +337,9 @@ def edit_adduct_mol(mol,adduct):
                     continue
             for pka in pkas[pkas.index(pka)+1:]:
                 pka = pka
-                atom = mol.GetAtomWithIdx(pka)
+                atom = mol_nH.GetAtomWithIdx(pka)
                 if atom.GetTotalNumHs() != 0:
+                    atom = mol.GetAtomWithIdx(pka)
                     neighbors = [x for x in atom.GetNeighbors()]
                     neighbors_idx = [x.GetAtomicNum() for x in atom.GetNeighbors()]
                     if 1 in neighbors_idx:
