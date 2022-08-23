@@ -18,7 +18,7 @@ def main():
     y=model_predict.ccs_predict()
     dataset['predicts']=''
     for i in range(len(dataset['SMILES'])):
-        dataset['predicts'][i]=y[i]
+        dataset.loc[i,'predicts']=y[i]
 
 if __name__ == "__main__":
     main()
