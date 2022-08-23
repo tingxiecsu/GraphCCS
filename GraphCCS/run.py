@@ -84,7 +84,7 @@ def main():
     test['predict']=''
     a=list(np.load(config['result_folder'] +'DGL_GCN_logits.npy'))
     for i in range(len(test['SMILES'])):
-        test['predict'][i]=a[i]
+        test.loc[i,'predict']=a[i]
     test.to_csv(path+'test.csv',index=False)
     test_plot(test,config)
 
