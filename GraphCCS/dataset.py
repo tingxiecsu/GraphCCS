@@ -277,13 +277,13 @@ def edit_adduct_mol(mol,adduct):
                     GasteigerCharge = float(atom.GetProp('_GasteigerCharge'))
                     if GasteigerCharge < GasteigerCharge_initial:
                         leaving_group = atom
-                        neighbors_idx = [x.GetAtomicNum() for x in atom.GetNeighbors()]
-                        H_idx = max(neighbors_idx)-1
+                        neighbors_idx = [x.GetIdx() for x in atom.GetNeighbors()]
+                        H_idx = max(neighbors_idx)
                         GasteigerCharge_intial = GasteigerCharge
             O_idx = leaving_group.GetIdx()
             mw = Chem.RWMol(mol)
-            mw.RemoveAtom(O_idx)
             mw.RemoveAtom(H_idx)
+            mw.RemoveAtom(O_idx)
             edit_mol = mw.GetMol()
     elif adduct[-1] == '-':
         if adduct == '[M-H]-':
