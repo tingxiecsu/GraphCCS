@@ -57,7 +57,7 @@ class AdductToOneHotEncoder(BaseEncoder):
         """
         X : array of all elements
         """
-        for i, j in enumerate(set(X)):
+        for i, j in enumerate(X):
             self.converter[j] = i
     def _transform(self, X):
         X_encoded = np.zeros(len(self.converter))
@@ -76,15 +76,16 @@ def atom_to_feature(atom,mol):
     '''
     atom_features1 = []
     atom_features2 = []
-    atom_list = ['C','N', 'O', 'S', 'F', 'Si', 'P','Cl', 'Br', 'Mg', 'Na',
-                 'Ca', 'Fe', 'As', 'Al','I', 'B', 'V', 'K', 'Tl', 'Yb', 'Sb', 
-                 'Sn', 'Ag', 'Pd', 'Co', 'Se', 'Ti', 'Zn','H', 'Li', 'Ge', 
-                 'Cu', 'Au', 'Ni', 'Cd', 'In', 'Mn', 'Zr', 'Cr','Pt', 'Hg', 'Pb',
-                 'Te','Mo','Nb','He','Be','Ne','Ar','Sc','Ti','Cr','Ga','Ge',
-                 'Kr','Rb','Sr','Zr','Mo','Tc','Ru','Rh','Xe','Cs','Ba',
-                 'La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm',
-                 'Yb','Lu','Hf','Ta','Re','Os','Ir','Bi','Po','At','Rn','Fr',
-                 'Ra','Ac','Th','Pa','Np','Pu','Am','Cm','Bk','Cf','Ts','Md','W']
+    atom_list = ['F', 'Bk', 'Ge', 'Ce', 'Mn', 'Zn', 'Fe', 'Th', 'Tb', 'H', 'Ac',
+                 'Kr', 'Dy', 'Cf', 'Cl', 'Nd', 'Pt', 'Co', 'Sb', 'Ne', 'Zr', 'S',
+                 'C', 'O', 'Pa', 'Ru', 'Eu', 'V', 'La', 'Bi', 'Se', 'Li', 'Si',
+                 'Ag', 'Au', 'Ti', 'Pm', 'He', 'Tl', 'Ra', 'Hf', 'Lu', 'Na', 
+                 'Sr', 'I', 'Al', 'Cm', 'Cs', 'Br', 'Mo', 'Er', 'Cu', 'Ts', 
+                 'Mg', 'Pb', 'Gd', 'Tc', 'Rh', 'Ir', 'Yb', 'Te', 'B', 'N', 'Po',
+                 'Pu', 'Hg', 'Ba', 'Np', 'Sc', 'As', 'At', 'K', 'Ca', 'Pd', 'P',
+                 'In', 'Rn', 'Be', 'Pr', 'Os', 'Cd', 'Sn', 'W', 'Xe', 'Ni', 'Ta',
+                 'Nb', 'Fr', 'Ar', 'Tm', 'Re', 'Rb', 'Sm', 'Cr', 'Ga', 'Am', 
+                 'Ho', 'Md']
     atom_index = atom.GetIdx()
     AllChem.ComputeGasteigerCharges(mol)
     GasteigerCharge = atom.GetProp('_GasteigerCharge')
