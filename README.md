@@ -3,7 +3,7 @@ This is the code repo for the paper Prediction of Collision Cross Sections with 
 Network for Metabolites Annotation. We developed a method named GraphCCS which can obtain the data-driven
 representations of molecules through the end-to-end learning with GCN, and predict the retention time with 
 the GCN-learned representations. The network architecture is showed as follow:
-![image](https://github.com/tingxiecsu/GraphCCS/blob/main/image/fig4.jpg)
+![image](https://github.com/tingxiecsu/GraphCCS/blob/main/image/fig4.png)
 ### Package required:
 We recommend to use [conda](https://conda.io/docs/user-guide/install/download.html) and [pip](https://pypi.org/project/pip/).
 - [python3](https://www.python.org/) 
