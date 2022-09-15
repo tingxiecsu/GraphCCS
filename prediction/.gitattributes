@@ -1,2 +1,0 @@
-HMDB_prediction filter=lfs diff=lfs merge=lfs -text
-LipidBlast_prediction filter=lfs diff=lfs merge=lfs -text
