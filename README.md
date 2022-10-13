@@ -23,6 +23,7 @@ GraphCCS is a model for predicting CCS based on graph convolutional networks, so
 - add : Adduct type of molecule,string
 
 **2.** Generate the Graph dataset.
+
     data = graph_calculation(dataset)
     data_generator = data.DataLoader(data_process_loader_Property_Prediction(data.index.values,  data.Label.values,data), **params)
 *Optionnal args*
@@ -30,6 +31,7 @@ GraphCCS is a model for predicting CCS based on graph convolutional networks, so
 
 ## Model training
 Train the model based on your own training dataset with [train](https://github.com/tingxiecsu/GraphCCS/blob/main/GraphCCS/train.py) function.
+
     graphccs = Train(train,val,test,**config)
     graphccs.train_()
 
