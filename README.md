@@ -21,6 +21,7 @@ GraphCCS is a model for predicting CCS based on graph convolutional networks, so
 *Optionnal args*
 - smi : Molecular SMILES,string
 - add : Adduct type of molecule,string
+
 **2.** Generate the Graph dataset.
     data = graph_calculation(dataset)
     data_generator = data.DataLoader(data_process_loader_Property_Prediction(data.index.values,  data.Label.values,data), **params)
