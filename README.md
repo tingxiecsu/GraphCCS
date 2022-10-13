@@ -15,6 +15,7 @@ We recommend to use [conda](https://conda.io/docs/user-guide/install/download.ht
 ## Adduct graph generation
 **1.** Generate adduct ggl-graph of molecules. 
 GraphCCS is a model for predicting CCS based on graph convolutional networks, so we need to convert SMILES strings to Adduct Graph. The related method is shown in [`GrapgCCS/dataset.py`](GraphCCS/dataset.py)
+
     mol = Chem.MolFromSmiles(smi)
     v_ds = edit_adduct_mol(mol, add)
     v_d = fc(mol = v_ds, node_featurizer = node_featurizer, edge_featurizer = None,explicit_hydrogens = True)
