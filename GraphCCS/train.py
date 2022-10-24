@@ -98,6 +98,18 @@ def graph_calculation(df):
 
 
 class Train():
+	"""
+    Train, validate, and test the model
+    Arguments:
+        train: pandas.core.frame.DataFrame
+            training set.
+        val: pandas.core.frame.DataFrame
+            validation set.
+        test: pandas.core.frame.DataFrame
+            testing set.
+        config: dict
+            config dictionary.
+	"""
 	def __init__(self,  train, val, test,**config):
 		self.config = config
 		self.train = train
@@ -110,6 +122,21 @@ class Train():
 		self.binary = False
 
 	def test_(self, data_generator, model):
+		"""
+	test the model
+	Arguments:
+		data_generator: torch.utils.data.dataloader.DataLoader
+				testing generator
+        model: model
+				GraphCCS model.
+	Returns:
+		means quared error of the predicted values and labels
+		Pearson's correlation coefficient of the predicted values and labels
+		Pearson's correlation coefficient with p-value of the predicted values and labels
+		concordance index of the predicted values and labels
+		y_pred: list
+				predicted CCS values
+	"""
 		y_pred = []
 		y_label = []
 		model.eval()
@@ -249,6 +276,19 @@ class Train():
 
 
 class Predict():
+    """
+    Predict CCS values
+    Arguments:
+        df_data: pandas.core.frame.DataFrame
+            Datasets with SMILES and adduct types of compounds to be predicted.
+        model_path: string
+            path to the pretrained model.
+        config: dict
+            config dictionary.
+    Returns:
+        y_pred: list
+            predicted CCS values
+    """
     def __init__(self,df_data,model_path,**config):
         self.df_data = df_data
         self.model_path = model_path
