@@ -12,6 +12,18 @@ We recommend to use [conda](https://conda.io/docs/user-guide/install/download.ht
 - [dgl](https://www.dgl.ai/)
 - [dgllife](https://lifesci.dgl.ai/index.html)
 
+## Installation
+The main packages can be seen in [requirements.txt](https://github.com/tingxiecsu/GraphCCS/tree/main/requirements.txt)
+- Install Anaconda
+  https://www.anaconda.com/
+- Install main packages in requirements.txt with following commands 
+	```shell
+	conda create --name GraphCCS python=3.8.13
+	conda activate GraphCCS
+	python -m pip install -r requirements.txt
+	pip install tqdm
+	```
+    
 ## Adduct graph generation
 **1.** Generate adduct ggl-graph of molecules. 
 GraphCCS is a model for predicting CCS based on graph convolutional networks, so we need to convert SMILES strings to Adduct Graph. The related method is shown in [`GrapgCCS/dataset.py`](GraphCCS/dataset.py)
