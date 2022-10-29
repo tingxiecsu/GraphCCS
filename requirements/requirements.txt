@@ -1,8 +1,8 @@
-dgl==0.6.1
-dgl-cuda11.3==0.8.1
-dgllife==0.2.8
-scikit-learn==1.0.1
-scipy==1.7.2
-torch==1.10.0
-torchaudio==0.10.0
-torchvision==0.11.1
+dgl-cuda11.3==0.9.0
+dgllife==0.3.0
+rdkit==2022.03.5
+scikit-learn==0.24.2
+scipy==1.7.3
+pytorch==1.12.1
+torchaudio==0.12.1
+torchvision==0.13.1
