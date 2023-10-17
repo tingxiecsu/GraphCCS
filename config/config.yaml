@@ -8,4 +8,4 @@ result_folder: '/test/'
 gnn_hid_dim_drug: 256 
 gnn_num_layers: 1
 hidden_dim_drug: 256
-node_feat_size: 147
+node_feat_size: 148
