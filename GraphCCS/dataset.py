@@ -128,6 +128,7 @@ def atom_to_feature(atom,mol):
         if atom.IsInRingSize(ring_size):
             break
     atom_ringsize = atom_ringsize_encoder.transform(ring_size)
+    atom_formalcharge=float(atom.GetFormalCharge())
     atom_Chiral = float(atom.HasProp("_ChiralityPossible"))
     atom_mass = float(atom.GetMass()/100)
     asa = rdMolDescriptors._CalcLabuteASAContribs(mol)[0][atom_index] 
@@ -135,7 +136,7 @@ def atom_to_feature(atom,mol):
     atom_features1 = np.concatenate((atom_symbol,atom_degree,atom_ring,atom_hacceptor,
                                      atom_hdonor,atom_numhs,atom_aromatic,atom_hybrid,
                                      atom_valence,atom_ringsize),-1)
-    atom_features2.append([atom_Chiral,atom_mass,GasteigerCharge,CripperLogP,MolarRefrac,asa,tpsa])
+    atom_features2.append([atom_formalcharge,atom_Chiral,atom_mass,GasteigerCharge,CripperLogP,MolarRefrac,asa,tpsa])
     from sklearn.preprocessing import normalize
     atom_features2 = normalize(atom_features2, axis=1, norm='max')
     atom_features2 = list(atom_features2.squeeze(-2))
@@ -213,7 +214,7 @@ def featurize_atoms(mol):
     feature = []
     for atom in mol.GetAtoms():
         feature.append(atom_to_feature(atom,mol))
-    feature = np.array(feature).reshape(-1,147)
+    feature = np.array(feature).reshape(-1,148)
     feature = torch.tensor(feature)
     #feature[:,-7] = feature[torch.randperm(feature.size(0)),-7]
     return {'h': feature.float()}
