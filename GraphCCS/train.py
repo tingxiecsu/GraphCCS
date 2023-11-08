@@ -144,7 +144,7 @@ class Train():
 		decay_interval = self.config['decay_interval']
 		loss_history = []
 		opt = torch.optim.Adam(model.parameters(), lr = lr, weight_decay = 1e-6)
-		info_test = data_process_loader_Property_Prediction(self.test.index.values, self.test.Label.values, self.test)
+		info_test = data_process_loader_Property(self.test.index.values, self.test.Label.values, self.test)
 		params = {'batch_size': BATCH_SIZE,
 				'shuffle': True,
 				'num_workers': self.config['num_workers'],
@@ -160,9 +160,9 @@ class Train():
 		test = graph_calculation(self.test)
 		val = graph_calculation(self.val)
 
-		training_generator = data.DataLoader(data_process_loader_Property_Prediction(train.index.values,  train.Label.values,train), **params)
-		validation_generator = data.DataLoader(data_process_loader_Property_Prediction(val.index.values, val.Label.values, val), **params)
-		testing_generator = data.DataLoader(data_process_loader_Property_Prediction(test.index.values, test.Label.values, test), **params_test)
+		training_generator = data.DataLoader(data_process_loader_Property(train.index.values,  train.Label.values,train), **params)
+		validation_generator = data.DataLoader(data_process_loader_Property(val.index.values, val.Label.values, val), **params)
+		testing_generator = data.DataLoader(data_process_loader_Property(test.index.values, test.Label.values, test), **params_test)
 
 		max_MSE = 10000
 		model_max = copy.deepcopy(model)
