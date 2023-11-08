@@ -1,0 +1,14 @@
+batch_size: 64
+train_epoch: 200
+LR: 0.001
+decay: 0.85
+decay_interval: 10
+num_workers: 0
+result_folder: '/'
+num_layers: 50
+hid_dim: 400
+norm: none
+gru_out_layer: 2
+dropout: 0.1 
+edge_feat_size: 18
+node_feat_size: 148
