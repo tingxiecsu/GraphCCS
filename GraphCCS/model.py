@@ -14,7 +14,7 @@ from torch import nn
 
 class GCNPlain(nn.Sequential):
 	def __init__(self,in_feats, hidden_feats=None, activation=None, predictor_dim=None):
-		super(Graphccs, self).__init__()
+		super(GCNPlain, self).__init__()
 		self.input_dim_drug = 256
 
 		self.gnn = GCN(in_feats=in_feats,
