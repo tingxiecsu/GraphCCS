@@ -13,23 +13,21 @@ import os
 from torch.autograd import Variable
 from torch.utils import data
 from torch.utils.data import SequentialSampler
-from torch import nn 
 import matplotlib.pyplot as plt
 from time import time
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, median_absolute_error
 from lifelines.utils import concordance_index
 from scipy.stats import pearsonr
 import pickle 
-from dgllife.model.gnn.gcn import GCN
-from dgllife.model.readout.weighted_sum_and_max import WeightedSumAndMax
 torch.manual_seed(2)
 np.random.seed(3)
 import copy
 from prettytable import PrettyTable
-from dataset import data_process_loader_Property_Prediction
+from dataset import data_process_loader_Property_Prediction,data_process_loader_Property_Prediction
 from model import Graphccs
 from dataset import featurize_atoms,edit_adduct_mol
-from dgllife.utils import mol_to_bigraph, CanonicalAtomFeaturizer, CanonicalBondFeaturizer
+from dgllife.utils import mol_to_bigraph, CanonicalAtomFeaturizer, CanonicalBondFeaturizer, BaseBondFeaturizer
+from dgllife.utils import ConcatFeaturizer,bond_type_one_hot, bond_is_in_ring_one_hot,bond_is_conjugated_one_hot,bond_stereo_one_hot,bond_direction_one_hot
 from functools import partial
 from tqdm import tqdm
 from rdkit import Chem
@@ -45,46 +43,26 @@ def dgl_collate_func(x):
 	x = dgl.batch(x)
 	return x, torch.tensor(y)
 
-class Graphccs(nn.Sequential):
-	def __init__(self,in_feats, hidden_feats=None, activation=None, predictor_dim=None):
-		super(Graphccs, self).__init__()
-		self.input_dim_drug = 256
+def dgl_predict_collate_func(x):
+	import dgl
+	x = dgl.batch(x)
+	return x
 
-		self.gnn = GCN(in_feats=in_feats,
-                        hidden_feats=hidden_feats,
-                        activation=activation
-                        )
-		gnn_out_feats = self.gnn.hidden_feats[-1]
-		self.readout = WeightedSumAndMax(gnn_out_feats)
-		self.transform = nn.Linear((self.gnn.hidden_feats[-1] * 2), predictor_dim)
-
-		self.dropout = nn.Dropout(0.1)
-
-		self.hidden_dims = [1024,1024,512]
-		layer_size = len(self.hidden_dims)
-		dims = [self.input_dim_drug] + self.hidden_dims
-
-		self.predictor = nn.ModuleList([nn.Linear((dims[i]), dims[i+1]) for i in range(layer_size)])
-		self.properte = nn.Linear(self.hidden_dims[-1],1)
-
-	def forward(self, v_D):
-		# each encoding
-		feats = v_D.ndata.pop('h') 
-		node_feats = self.gnn(v_D, feats)
-		graph_feats = self.readout(v_D, node_feats)
-		v_f = self.transform(graph_feats)
-		# concatenate and classify
-		for i, l in enumerate(self.predictor):
-			if i==(len(self.predictor)-1): 
-				v_f = l(v_f)
-			else:
-				v_f = F.relu(self.dropout(l(v_f)))
-		v_f = self.properte(v_f)
-		return v_f
+class BondFeaturizer(BaseBondFeaturizer):
+    def __init__(self, bond_data_field='e', self_loop=False):
+        super(BondFeaturizer, self).__init__(
+            featurizer_funcs={bond_data_field: ConcatFeaturizer(
+                [bond_type_one_hot,
+                 bond_is_conjugated_one_hot,
+                 bond_is_in_ring_one_hot,
+                 bond_stereo_one_hot,
+                 bond_direction_one_hot]
+            )}, self_loop=self_loop)
 
 def graph_calculation(df):
     print("calculating molecular graphs")
     node_featurizer = featurize_atoms
+    edge_featurizer = BondFeaturizer(bond_data_field='e', self_loop=True)
     fc = partial(mol_to_bigraph, add_self_loop=True)
     df['Graph'] = ''
     for i in tqdm(range(len(df['SMILES']))):
@@ -92,7 +70,7 @@ def graph_calculation(df):
         add = df.loc[i,'Adduct']
         mol = Chem.MolFromSmiles(smi)
         v_ds = edit_adduct_mol(mol, add)
-        v_d = fc(mol = v_ds, node_featurizer = node_featurizer, edge_featurizer = None,explicit_hydrogens = True)
+        v_d = fc(mol = v_ds, node_featurizer = node_featurizer, edge_featurizer = edge_featurizer,explicit_hydrogens = True)
         df.loc[i,'Graph']=v_d
     return df
 
@@ -154,9 +132,10 @@ class Train():
 			concordance_index(y_label, y_pred), y_pred
 
 	def train_(self):
-		model= Graphccs(in_feats = self.config['node_feat_size'], hidden_feats = [self.config['gnn_hid_dim_drug']] * self.config['gnn_num_layers'], 
-					activation = [F.relu] * self.config['gnn_num_layers'], 
-					predictor_dim = self.config['hidden_dim_drug'])
+		model=GraphCCS(node_in_dim=self.config['node_feat_size'], edge_in_dim=self.config['edge_feat_size'], 
+											hidden_feats=[self.config['hid_dim']]*self.config['num_layers'], 
+											gru_out_layer=self.config['gru_out_layer'],  
+											dropout=self.config['dropout'], residual=True)
 		model = model.to(self.device)
 		lr = self.config['LR']
 		decay = self.config['decay']
@@ -296,24 +275,25 @@ class Predict():
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def ccs_predict(self):
-        model = Graphccs(in_feats = self.config['node_feat_size'], hidden_feats = [self.config['gnn_hid_dim_drug']] * self.config['gnn_num_layers'], 
-                         activation = [F.relu] * self.config['gnn_num_layers'], 
-                         predictor_dim = self.config['hidden_dim_drug'])
-        model = load_pretrained( model, self.model_path, device = 'cuda')
-        info = data_process_loader_Property_Prediction(self.df_data.index.values, self.df_data.Label.values, self.df_data, **self.config)
-        self.model.to(self.device)
+        model=GraphCCS(node_in_dim=self.config['node_feat_size'], edge_in_dim=self.config['edge_feat_size'], 
+                                         hidden_feats=[self.config['hid_dim']]*self.config['num_layers'],
+                                         gru_out_layer=self.config['gru_out_layer'], 
+                                         dropout=self.config['dropout'], residual=True)
+        load_pretrained( model, self.model_path, device = self.device)
+        info = data_process_loader_Property_Prediction(self.df_data.index.values, self.df_data)
+        model.to(self.device)
         params = {'batch_size': self.config['batch_size'],
                   'shuffle': False,
                   'num_workers': self.config['num_workers'],
                   'drop_last': False,
                   'sampler':SequentialSampler(info),
-                  'collate_fn': dgl_collate_func}
+                  'collate_fn': dgl_predict_collate_func}
         generator = data.DataLoader(info, **params)
         y_pred = []
-        self.model.eval()
+        model.eval()
         for i, (v_d) in enumerate(generator):
             v_d = v_d.to(self.device)
-            score = self.model(v_d)
+            score = model(v_d)
             logits = torch.squeeze(score).detach().cpu().numpy()
             y_pred = y_pred + logits.flatten().tolist()
         return y_pred
