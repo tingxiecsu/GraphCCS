@@ -366,7 +366,7 @@ def edit_adduct_mol(mol,adduct):
             edit_mol = mw.GetMol()
     return edit_mol
 
-class data_process_loader_Property_Prediction(data.Dataset):
+class data_process_loader_Property(data.Dataset):
 
     def __init__(self,list_IDs,labels,df):
         'Initialization'
@@ -384,3 +384,20 @@ class data_process_loader_Property_Prediction(data.Dataset):
         v_d = self.df.loc[index,'Graph']
         y = self.labels[index]
         return v_d, y
+
+class data_process_loader_Property_Prediction(data.Dataset):
+
+    def __init__(self,list_IDs,df):
+        'Initialization'
+        self.list_IDs = list_IDs
+        self.df = df
+
+    def __len__(self):
+        'Denotes the total number of samples'
+        return len(self.list_IDs)
+
+    def __getitem__(self, index):
+        'Generates one sample of data'
+        index = self.list_IDs[index]
+        v_d = self.df.loc[index,'Graph']
+        return v_d
