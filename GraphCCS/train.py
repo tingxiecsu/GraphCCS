@@ -24,7 +24,7 @@ np.random.seed(3)
 import copy
 from prettytable import PrettyTable
 from dataset import data_process_loader_Property_Prediction,data_process_loader_Property_Prediction
-from model import Graphccs
+from model import GraphCCS
 from dataset import featurize_atoms,edit_adduct_mol
 from dgllife.utils import mol_to_bigraph, CanonicalAtomFeaturizer, CanonicalBondFeaturizer, BaseBondFeaturizer
 from dgllife.utils import ConcatFeaturizer,bond_type_one_hot, bond_is_in_ring_one_hot,bond_is_conjugated_one_hot,bond_stereo_one_hot,bond_direction_one_hot
