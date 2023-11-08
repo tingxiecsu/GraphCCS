@@ -23,7 +23,7 @@ torch.manual_seed(2)
 np.random.seed(3)
 import copy
 from prettytable import PrettyTable
-from dataset import data_process_loader_Property_Prediction,data_process_loader_Property_Prediction
+from dataset import data_process_loader_Property,data_process_loader_Property_Prediction
 from model import GraphCCS
 from dataset import featurize_atoms,edit_adduct_mol
 from dgllife.utils import mol_to_bigraph, CanonicalAtomFeaturizer, CanonicalBondFeaturizer, BaseBondFeaturizer
