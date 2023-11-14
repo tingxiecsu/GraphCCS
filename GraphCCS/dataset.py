@@ -401,3 +401,28 @@ class data_process_loader_Property_Prediction(data.Dataset):
         index = self.list_IDs[index]
         v_d = self.df.loc[index,'Graph']
         return v_d
+
+class data_process_loader_Property_addMD(data.Dataset):
+
+    def __init__(self,list_IDs,labels,df):
+        'Initialization'
+        self.list_IDs = list_IDs
+        self.labels = labels
+        self.df = df
+        self.desc_names = [desc[0] for desc in Descriptors.descList]
+
+    def __len__(self):
+        'Denotes the total number of samples'
+        return len(self.list_IDs)
+
+    def __getitem__(self, index):
+        'Generates one sample of data'
+        index = self.list_IDs[index]
+        smi = self.df.loc[index,'SMILES']
+        v_d = self.df.loc[index,'Graph']
+        mol = Chem.MolFromSmiles(smi)
+        descriptors = [[eval('Descriptors.' + desc)(mol) for desc in self.desc_names]]
+        descriptors= normalize(descriptors, axis=1, norm='max')
+        descriptors = descriptors.squeeze(-2)
+        y = self.labels[index]
+        return v_d,y,descriptors
