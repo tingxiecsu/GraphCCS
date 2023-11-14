@@ -11,10 +11,11 @@ import torch
 import random
 from rdkit import Chem
 from rdkit.Chem import Lipinski
-from rdkit.Chem import AllChem,rdMolDescriptors
+from rdkit.Chem import AllChem,rdMolDescriptors,Descriptors
 from torch.utils import data
 from functools import partial
 from dgllife.utils import mol_to_bigraph, CanonicalAtomFeaturizer, CanonicalBondFeaturizer
+from sklearn.preprocessing import normalize
 
 class BaseEncoder(object):
     """
