@@ -170,3 +170,54 @@ class GraphCCS(nn.Module):
         out = self.readout(g, node_feat)
         out = self.out(out)
         return out
+
+class GraphCCS_MD(nn.Module):
+    def __init__(self, node_in_dim, edge_in_dim, hidden_feats=None, activation=F.relu,
+                  dropout=0.1, gru_out_layer=2,residual=True):
+        super(GraphCCS_MD, self).__init__()
+
+        if hidden_feats is None:
+            hidden_feats = [200]*5
+
+        in_feats = hidden_feats[0]
+        n_layers = len(hidden_feats)
+
+        activation = [activation for _ in range(n_layers)]
+        dropout = [dropout for _ in range(n_layers)]
+
+        lengths = [len(hidden_feats), len(activation),len(dropout)]
+        assert len(set(lengths)) == 1, 'Expect the lengths of hidden_feats ' \
+                                       'activation, and dropout to ' \
+                                       'be the same, got {}'.format(lengths)
+
+        self.embed_layer = EmbeddingLayerConcat(node_in_dim, hidden_feats[0], edge_in_dim, hidden_feats[0])
+        self.hidden_feats = hidden_feats
+        self.gnn_layers = nn.ModuleList()
+        for i in range(n_layers):
+            depth=i
+            self.gnn_layers.append(GCNLayerWithEdge(in_feats, hidden_feats[i], depth,activation[i],  dropout[i],residual=True))
+            in_feats = hidden_feats[i]
+
+        self.readout = AttentiveFPReadout(
+            hidden_feats[-1], num_timesteps=gru_out_layer, dropout=dropout[-1]
+        )
+        #self.readout = WeightedSumAndMax(hidden_feats[-1])
+        self.out = nn.Sequential(
+            nn.Linear(hidden_feats[-1]+209, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 1)
+        )
+
+    def reset_parameters(self):
+        for gnn in self.gnn_layers:
+            gnn.reset_parameters()
+
+    def forward(self, g,descriptors):
+        node_feat, edge_feat = self.embed_layer(g)
+        for gnn in self.gnn_layers:
+            node_feat = gnn(g, node_feat, edge_feat)
+        out = self.readout(g, node_feat)
+        #descriptors = torch.stack((descriptors,))
+        out = torch.cat((out,descriptors),1)
+        out = self.out(out)
+        return out
