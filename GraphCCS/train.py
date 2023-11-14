@@ -48,6 +48,12 @@ def dgl_predict_collate_func(x):
 	x = dgl.batch(x)
 	return x
 
+def dgl_md_collate_func(x):
+    x, y,d = zip(*x)
+    import dgl
+    x = dgl.batch(x)
+    return x, torch.tensor(y),torch.FloatTensor(d)
+
 class BondFeaturizer(BaseBondFeaturizer):
     def __init__(self, bond_data_field='e', self_loop=False):
         super(BondFeaturizer, self).__init__(
@@ -74,6 +80,23 @@ def graph_calculation(df):
         df.loc[i,'Graph']=v_d
     return df
 
+def graph_calculation_predict(df):
+    print("calculating molecular graphs")
+    node_featurizer = featurize_atoms
+    edge_featurizer = BondFeaturizer(bond_data_field='e', self_loop=True)
+    fc = partial(mol_to_bigraph, add_self_loop=True)
+    df2=pd.DataFrame(columns=['SMILES','Adduct','Graph'])
+    for i in tqdm(range(len(df['SMILES']))):
+        try:
+            smi = df.loc[i,'SMILES']
+            add = df.loc[i,'Adduct']
+            mol = Chem.MolFromSmiles(smi)
+            v_ds = edit_adduct_mol(mol, add)
+            v_d = fc(mol = v_ds, node_featurizer = node_featurizer, edge_featurizer = edge_featurizer,explicit_hydrogens = True)
+            df2.loc[len(df2)]=[smi,add,v_d]
+        except:
+            print('SMILES' + smi + 'calculated failed')
+    return df2
 
 class Train():
 	"""
@@ -267,6 +290,7 @@ class Predict():
     Returns:
         y_pred: list
             predicted CCS values
+	dataset: dataframe
     """
     def __init__(self,df_data,model_path,**config):
         self.df_data = df_data
@@ -275,12 +299,16 @@ class Predict():
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def ccs_predict(self):
+        df_data = graph_calculation_predict(self.df_data)
+        '''model= GCNPlain(in_feats = self.config['node_feat_size'], hidden_feats = [self.config['gnn_hid_dim_drug']] * self.config['gnn_num_layers'], 
+                activation = [F.relu] * self.config['gnn_num_layers'], 
+                predictor_dim = self.config['hidden_dim_drug'])'''
         model=GraphCCS(node_in_dim=self.config['node_feat_size'], edge_in_dim=self.config['edge_feat_size'], 
                                          hidden_feats=[self.config['hid_dim']]*self.config['num_layers'],
                                          gru_out_layer=self.config['gru_out_layer'], 
                                          dropout=self.config['dropout'], residual=True)
-        load_pretrained( model, self.model_path, device = self.device)
-        info = data_process_loader_Property_Prediction(self.df_data.index.values, self.df_data)
+        load_pretrained( model, self.model_path, device = 'cuda')
+        info = data_process_loader_Property_Prediction(df_data.index.values, df_data)
         model.to(self.device)
         params = {'batch_size': self.config['batch_size'],
                   'shuffle': False,
@@ -296,7 +324,7 @@ class Predict():
             score = model(v_d)
             logits = torch.squeeze(score).detach().cpu().numpy()
             y_pred = y_pred + logits.flatten().tolist()
-        return y_pred
+        return y_pred,df_data
 
 
 def load_pretrained(device,model, path):
