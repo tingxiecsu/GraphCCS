@@ -5,7 +5,7 @@ decay: 0.85
 decay_interval: 10
 num_workers: 0
 result_folder: '/'
-num_layers: 50
+num_layers: 40
 hid_dim: 400
 norm: none
 gru_out_layer: 2
