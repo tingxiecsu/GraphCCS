@@ -8,7 +8,8 @@ Created on Thu Jun  2 15:38:29 2022
 import dgl.function as fn
 from dgl.nn.functional import edge_softmax
 from dgllife.model.gnn.gcn import GCN
-from dgllife.model.readout.weighted_sum_and_max import WeightedSumAndMax,AttentiveFPReadout
+from dgllife.model.readout.weighted_sum_and_max import WeightedSumAndMax
+from dgllife.model.readout.attentivefp_readout import AttentiveFPReadout
 import torch.nn.functional as F
 from torch import nn 
 
