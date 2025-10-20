@@ -106,8 +106,10 @@ def atom_to_feature(atom,mol):
     atom_hacceptor =  atom_is_in_ring_encoder.transform(atom.GetIdx() in [i[0] for i in Lipinski._HAcceptors(mol)])
     atom_hdonor = atom_is_in_ring_encoder.transform(atom.GetIdx() in [i[0] for i in Lipinski._HDonors(mol)])
     atom_hybrid_encoder = AdductToOneHotEncoder()
-    atom_hybrid_encoder.fit([Chem.rdchem.HybridizationType.SP,
+    atom_hybrid_encoder.fit([Chem.rdchem.HybridizationType.OTHER,
+                         Chem.rdchem.HybridizationType.SP,
                          Chem.rdchem.HybridizationType.SP2,
+                         Chem.rdchem.HybridizationType.SP2D,
                          Chem.rdchem.HybridizationType.SP3,
                          Chem.rdchem.HybridizationType.SP3D,
                          Chem.rdchem.HybridizationType.SP3D2,
@@ -215,7 +217,7 @@ def featurize_atoms(mol):
     feature = []
     for atom in mol.GetAtoms():
         feature.append(atom_to_feature(atom,mol))
-    feature = np.array(feature).reshape(-1,148)
+    feature = np.array(feature).reshape(-1,150)
     feature = torch.tensor(feature)
     #feature[:,-7] = feature[torch.randperm(feature.size(0)),-7]
     return {'h': feature.float()}
@@ -427,3 +429,4 @@ class data_process_loader_Property_addMD(data.Dataset):
         descriptors = descriptors.squeeze(-2)
         y = self.labels[index]
         return v_d,y,descriptors
+
