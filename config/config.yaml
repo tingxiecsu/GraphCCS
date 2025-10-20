@@ -11,4 +11,5 @@ norm: none
 gru_out_layer: 2
 dropout: 0.1 
 edge_feat_size: 18
-node_feat_size: 148
+node_feat_size: 150
+
